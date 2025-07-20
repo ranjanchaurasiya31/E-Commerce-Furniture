@@ -1,0 +1,11 @@
+{% extends 'bootstrap/base.html' %}
+{% block title %}Welcome to Furniture Store{% endblock %}
+{% block content %}
+<div class="bg-light py-5 mb-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Welcome to Furniture Store</h1>
+        <p class="lead">Discover quality furniture for every room. Shop the latest trends and timeless classics.</p>
+        <a href="{{ url_for('main.products') }}" class="btn btn-primary btn-lg mt-3">Shop Now</a>
+    </div>
+</div>
+{% endblock %} 

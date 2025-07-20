@@ -1,0 +1,120 @@
+{% extends 'bootstrap/base.html' %}
+{% block title %}Shopping Cart{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    <button class="btn btn-outline-secondary mb-3" onclick="window.history.back()">
+        <i class="fa fa-arrow-left"></i> Back
+    </button>
+</div>
+<div class="container mt-5">
+    <h1 class="mb-4">Shopping Cart</h1>
+    {% if cart_items %}
+    <form method="post" id="cart-form">
+        {{ form.hidden_tag() }}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td class="cart-price">${{ '%.2f'|format(item.product.price) }}</td>
+                    <td>
+                        <input type="number"
+                               name="quantity_{{ item.product.id }}"
+                               value="{{ item.quantity }}"
+                               min="1"
+                               max="{{ item.product.stock }}"
+                               class="form-control cart-qty"
+                               style="width:80px;">
+                    </td>
+                    <td class="cart-subtotal">${{ '%.2f'|format(item.subtotal) }}</td>
+                    <td>
+                        <button type="submit" name="remove_{{ item.product.id }}" class="btn btn-danger btn-sm">Remove</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 id="cart-total">Total: ${{ '%.2f'|format(total) }}</h4>
+            <div>
+                <!-- Checkout button now submits the form -->
+                <button type="button" id="proceed-checkout" class="btn btn-success">Proceed to Checkout</button>
+            </div>
+        </div>
+    </form>
+    <script>
+document.querySelectorAll('.cart-qty').forEach(function(input) {
+    input.addEventListener('input', function() {
+        var max = parseInt(input.getAttribute('max'));
+        var min = parseInt(input.getAttribute('min')) || 1;
+        var val = parseInt(input.value);
+        if (val > max) {
+            input.value = max;
+            alert('Sorry, only ' + max + ' in stock for this product.');
+        }
+        if (val < min || isNaN(val)) {
+            input.value = min;
+        }
+    });
+});
+
+document.getElementById('cart-form').addEventListener('submit', function(e) {
+    var valid = true;
+    document.querySelectorAll('.cart-qty').forEach(function(input) {
+        var max = parseInt(input.getAttribute('max'));
+        var min = parseInt(input.getAttribute('min')) || 1;
+        var val = parseInt(input.value);
+        if (val > max || val < min || isNaN(val)) {
+            valid = false;
+            input.value = Math.max(min, Math.min(max, isNaN(val) ? min : val));
+            alert('Please enter a valid quantity between ' + min + ' and ' + max + '.');
+        }
+    });
+    if (!valid) {
+        e.preventDefault();
+    }
+});
+
+function updateCartTotals() {
+    let total = 0;
+    document.querySelectorAll('.cart-qty').forEach(function(input) {
+        var row = input.closest('tr');
+        var price = parseFloat(row.querySelector('.cart-price').textContent.replace('$', ''));
+        var qty = parseInt(input.value);
+        var subtotalCell = row.querySelector('.cart-subtotal');
+        var subtotal = price * qty;
+        subtotalCell.textContent = '$' + subtotal.toFixed(2);
+        total += subtotal;
+    });
+    document.getElementById('cart-total').textContent = 'Total: $' + total.toFixed(2);
+}
+
+document.querySelectorAll('.cart-qty').forEach(function(input) {
+    input.addEventListener('input', function() {
+        updateCartTotals();
+    });
+});
+document.getElementById('proceed-checkout').addEventListener('click', function() {
+    var form = document.getElementById('cart-form');
+    var checkoutInput = document.createElement('input');
+    checkoutInput.type = 'hidden';
+    checkoutInput.name = 'proceed_to_checkout';
+    checkoutInput.value = '1';
+    form.appendChild(checkoutInput);
+    form.submit();
+});
+</script>
+    {% else %}
+    <p>Your cart is empty.</p>
+    {% endif %}
+</div>
+{% endblock %} 

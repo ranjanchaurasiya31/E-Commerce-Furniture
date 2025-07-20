@@ -1,0 +1,63 @@
+{% extends 'bootstrap/base.html' %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    <button class="btn btn-outline-secondary mb-3" onclick="window.history.back()">
+        <i class="fa fa-arrow-left"></i> Back
+    </button>
+</div>
+<div class="container mt-5">
+    <h1 class="mb-4">Furniture Products</h1>
+    <form method="get" class="mb-4 row g-2">
+        <div class="col-auto">
+            <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ search }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 product-card position-relative">
+                    {% if product.stock == 0 %}
+                        <span class="out-of-stock">Out of Stock</span>
+                    {% endif %}
+                    <img src="{{ url_for('static', filename='images/' ~ (product.image or 'placeholder.png')) }}"
+                         class="card-img-top"
+                         alt="{{ product.name }}"
+                         style="width: 100%; height: 200px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">${{ '%.2f'|format(product.price) }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <a href="/product/{{ product.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                            {% if product.stock > 0 %}
+                            <form method="post" action="/product/{{ product.id }}" style="display:inline;">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="from_products" value="1">
+                                <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-cart-plus"></i> Add</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="?search={{ search }}&page={{ page_num }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+</div>
+{% endblock %} 

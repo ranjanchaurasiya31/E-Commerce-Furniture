@@ -1,0 +1,45 @@
+{% extends 'bootstrap/base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<div class="container mt-3">
+    <button class="btn btn-outline-secondary mb-3" onclick="window.history.back()">
+        <i class="fa fa-arrow-left"></i> Back
+    </button>
+</div>
+<div class="container mt-5">
+    <h1 class="mb-4">Checkout</h1>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.address.label(class="form-label") }}
+            {{ form.address(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.phone.label(class="form-label") }}
+            {{ form.phone(class="form-control") }}
+        </div>
+        <h4>Order Summary</h4>
+        <ul class="list-group mb-3">
+            {% for item in cart_items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.product.name }} x {{ item.quantity }}
+                <span>${{ '%.2f'|format(item.subtotal) }}</span>
+            </li>
+            {% endfor %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Total</strong>
+                <strong>${{ '%.2f'|format(total) }}</strong>
+            </li>
+        </ul>
+        <button type="submit" class="btn btn-success">Place Order</button>
+    </form>
+</div>
+{% endblock %} 
